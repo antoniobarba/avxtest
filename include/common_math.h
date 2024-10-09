@@ -15,29 +15,15 @@ T map_to(T value, T sourceMin, T sourceMax, T destMin, T destMax)
     return destMin + sourceRatio * d;
 }
 
-using MandelbrotFunc = std::function<void(void*, int, int, const SDL_PixelFormat*)>;
+inline uint32_t map_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+    return r << 24 | g << 16 | b << 8 | a;
+}
 
-/* Mandelbrot set pseudo-code from Wikipedia: 
-
-    for each pixel (Px, Py) on the screen do
-    x0 := scaled x coordinate of pixel (scaled to lie in the Mandelbrot X scale (-2.00, 0.47))
-    y0 := scaled y coordinate of pixel (scaled to lie in the Mandelbrot Y scale (-1.12, 1.12))
-    x := 0.0
-    y := 0.0
-    iteration := 0
-    max_iteration := 1000
-    while (x*x + y*y ≤ 2*2 AND iteration < max_iteration) do
-        xtemp := x*x - y*y + x0
-        y := 2*x*y + y0
-        x := xtemp
-        iteration := iteration + 1
- 
-    color := palette[iteration]
-    plot(Px, Py, color)
-*/
+using MandelbrotFunc = std::function<void(void*, int, int)>;
 
 template <class T>
-void mandelbrot_base(void* points, int w, int h, const SDL_PixelFormat* f)
+void mandelbrot_base(void* points, int w, int h)
 {
     uint32_t * p = (uint32_t *)points; 
 
@@ -59,16 +45,16 @@ void mandelbrot_base(void* points, int w, int h, const SDL_PixelFormat* f)
                 ++iteration;
             }
             T color = map_to(iteration, 0, 15, 0, 255);
-            p[j * w + i] = SDL_MapRGBA(f, (Uint8)color, (Uint8)color, (Uint8)color, 255);
+            p[j * w + i] = map_rgba((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
         }
     }
 }
 
 template <class T>
-void mandelbrot_omp(void* points, int w, int h, const SDL_PixelFormat* f)
+void mandelbrot_omp(void* points, int w, int h)
 {
     uint32_t * p = (uint32_t *)points;      
-    #pragma omp parallel for default(private) shared(w, h, f, p)
+    #pragma omp parallel for default(private) shared(w, h, p)
     for (int j=0; j<h; ++j)
     {
         for (int i=0; i<w; ++i)
@@ -87,7 +73,7 @@ void mandelbrot_omp(void* points, int w, int h, const SDL_PixelFormat* f)
                 ++iteration;
             }
             T color = map_to(iteration, 0, 15, 0, 255);
-            p[j * w + i] = SDL_MapRGBA(f, (Uint8)color, (Uint8)color, (Uint8)color, 255);
+            p[j * w + i] = map_rgba((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
         }
     }
 }

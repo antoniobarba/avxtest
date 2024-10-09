@@ -10,12 +10,30 @@ constexpr size_t window_h = 1024;
 
 using namespace mandelbrot_highway;
 
-void time_and_test(int iterations, MandelbrotFunc f, const std::string& name, void * buffer, int w, int h, const SDL_PixelFormat* format)
+void time_and_test(size_t iterations, MandelbrotFunc f, const std::string& name, void * buffer, int w, int h)
 {
-    auto time_before = std::chrono::high_resolution_clock::now();
-    for (int i=0; i<iterations; ++i) f(buffer, w, h, format);
-    auto elapsed = std::chrono::high_resolution_clock::now() - time_before;
-    std::cout << "name: "<< name << "\t" << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed / iterations) << " average over " << iterations << " iterations\n";
+    using ns = std::chrono::nanoseconds;
+    ns bestTime{std::chrono::nanoseconds::max()};
+    ns worst{std::chrono::nanoseconds::min()};
+
+    for (int i=0; i<iterations; ++i)
+    {
+        auto time_before = std::chrono::high_resolution_clock::now();
+        f(buffer, w, h);
+        auto elapsed = std::chrono::high_resolution_clock::now() - time_before;
+
+        if (elapsed < bestTime)
+        {
+            bestTime = elapsed;
+        }
+        if (elapsed > worst)
+        {
+            worst = elapsed;
+        }
+    }
+
+    std::cout << "Testing "<< name << " over " << iterations << " iterations: ";
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(bestTime) << " - " << std::chrono::duration_cast<std::chrono::milliseconds>(worst) << "\n";
 }
 
 int main(int argc, char** argv)
@@ -54,11 +72,40 @@ int main(int argc, char** argv)
         buffer = malloc(sizeof(size_t) * window_h * window_w);
     }
 
-    const int howMany = 3;
-    time_and_test(howMany, mandelbrot_base<float>,          "Base algo           ", buffer, window_w, window_h, format);
-    time_and_test(howMany, mandelbrot_omp<float>,           "Base algo, 4 core   ", buffer, window_w, window_h, format);
-    time_and_test(howMany, mandelbrot_highway::mandelbrot,  "AVX2 algo, 4 core   ", buffer, window_w, window_h, format);
-    
+    bool quit = false;
+    // TODO: Make something appear on the screen while calculating
+    // std::thread t;
+    // if (render)
+    // {
+    //     // Start background thread to update the graphics
+    //     t = std::thread([&]{
+    //         while (!quit)
+    //         {
+    //             SDL_Delay(500);
+
+    //             if (SDL_MUSTLOCK(canvas))
+    //             {
+    //                 SDL_LockSurface(canvas);
+    //             }
+
+    //             SDL_BlitSurface(canvas, 0, s, 0);
+    //             SDL_UpdateWindowSurface(window);
+
+    //             if (SDL_MUSTLOCK(canvas))
+    //             {
+    //                 SDL_UnlockSurface(canvas);
+    //             }
+
+    //         }
+    //     });
+    // }
+
+    const int howMany = 5;
+    time_and_test(howMany, mandelbrot_base<float>,          "Base algo single core ", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_omp<float>,           "Base algo on 4 core   ", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_highway::mandelbrot,  "AVX2 algo on 4 core   ", buffer, window_w, window_h);
+    //t.join();
+
     if (render)
     {
         if (SDL_MUSTLOCK(canvas))
@@ -67,7 +114,6 @@ int main(int argc, char** argv)
         }
 
         // Cleanup
-        bool quit = false;
         SDL_Event event;
         while (!quit)
         {
