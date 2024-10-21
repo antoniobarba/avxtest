@@ -3,6 +3,9 @@ project(AVXTest VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED 23)
+
+set(CMAKE_CXX_FLAGS "-ffast-math")
+
 find_package(OpenMP REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(HWY REQUIRED NO_MODULE)

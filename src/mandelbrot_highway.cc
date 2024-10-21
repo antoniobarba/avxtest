@@ -40,52 +40,56 @@ namespace HWY_NAMESPACE {  // required: unique per target
             oneTwoThreeFour = InsertLane<T>(oneTwoThreeFour, lane, T{1} * lane);
         }
 
-        #pragma omp parallel for default(private) shared(h,w,oneTwoThreeFour,p)
-        for (int j=0; j<h; ++j)
+        #pragma omp parallel default(private) shared(h,w,oneTwoThreeFour,p)
         {
-            for (int i=0; i<w; i += Lanes(d))
+            #pragma omp for nowait
+            for (int j=0; j<h; ++j)
             {
-                V x0 = vec_map_to<V>(Set(d,i) + oneTwoThreeFour, Zero(d), Set(d,w), Set(d, -2.0), Set(d, 0.47));
-                V y0 = vec_map_to<V>(Set(d,j), Zero(d), Set(d,h), Set(d, -1.12), Set(d, 1.12));
-                V x = Zero(d);
-                V y = Zero(d);
-                V iteration = Zero(d);
-
-                V ySquared = Mul(y ,y);
-
-                const V one = Set(d, 1.0);
-                const V two = Set(d, 2.0);
-                const V four = Set(d, 4.0);
-
-                auto LessThan4 = x*x + y*y <= four;
-                bool keepChurning = CountTrue(d, LessThan4) >= 1;
-
-                int scalariteration = 0;
-                while (keepChurning && scalariteration < 1000)
+                for (int i=0; i<w; i += Lanes(d))
                 {
-                    V xTemp = x*x - y*y + x0;
-                    y = two * x * y + y0;
-                    x = xTemp;
-                    
-                    LessThan4 = x*x + y*y <= four;
-                    iteration = MaskedAddOr(iteration, LessThan4, iteration, one);
-                    keepChurning = CountTrue(d, LessThan4) >= 1;
-                    ++scalariteration;
-                }
+                    V x0 = vec_map_to<V>(Set(d,i) + oneTwoThreeFour, Zero(d), Set(d,w), Set(d, -2.0), Set(d, 0.47));
+                    V y0 = vec_map_to<V>(Set(d,j), Zero(d), Set(d,h), Set(d, -1.12), Set(d, 1.12));
+                    V x = Zero(d);
+                    V y = Zero(d);
+                    V iteration = Zero(d);
 
-                V color = vec_map_to<V>(iteration, Zero(d), Set(d, 15.0), Zero(d), Set(d, 255));
+                    V ySquared = Mul(y ,y);
 
-                // Map a vector of colors (slow, non vectorized)
-                HWY_ALIGN std::array<T, Lanes(d)> vColor;
-                Store(color, d, vColor.data());
+                    const V one = Set(d, 1.0);
+                    const V two = Set(d, 2.0);
+                    const V four = Set(d, 4.0);
 
-                for (size_t lane=0; lane<Lanes(d); ++lane)
-                {
-                    uint8_t value = (uint8_t)color.raw[lane];
-                    p[j*w + i + lane] = map_rgba(value, value, value, 255);
+                    auto LessThan4 = x*x + y*y <= four;
+                    bool keepChurning = CountTrue(d, LessThan4) >= 1;
+
+                    int scalariteration = 0;
+                    while (keepChurning && scalariteration < 1000)
+                    {
+                        V xTemp = x*x - y*y + x0;
+                        y = two * x * y + y0;
+                        x = xTemp;
+                        
+                        LessThan4 = x*x + y*y <= four;
+                        iteration = MaskedAddOr(iteration, LessThan4, iteration, one);
+                        keepChurning = CountTrue(d, LessThan4) >= 1;
+                        ++scalariteration;
+                    }
+
+                    V color = vec_map_to<V>(iteration, Zero(d), Set(d, 15.0), Zero(d), Set(d, 255));
+
+                    // Map a vector of colors (slow, non vectorized)
+                    HWY_ALIGN std::array<T, Lanes(d)> vColor;
+                    Store(color, d, vColor.data());
+
+                    for (size_t lane=0; lane<Lanes(d); ++lane)
+                    {
+                        uint8_t value = (uint8_t)color.raw[lane];
+                        p[j*w + i + lane] = map_rgba(value, value, value, 255);
+                    }
                 }
             }
         }
+        
     }
 
 
