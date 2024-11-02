@@ -40,19 +40,26 @@ void time_and_test(size_t iterations, MandelbrotFunc f, const std::string& name,
 int main(int argc, char** argv)
 {
     int num_devices = omp_get_num_devices();
-    printf("Number of available devices %d\n", num_devices);
+    printf("Number of available OpenMP devices %d\n", num_devices);
     #pragma omp target 
     {
         if (omp_is_initial_device()) 
         {
-            printf("Running on host\n");    
+            printf("No GPU detected by OpenMP\n");    
         } 
         else 
         {
             int nteams= omp_get_num_teams(); 
             int nthreads= omp_get_num_threads();
-            printf("Running on device with %d teams in total and %d threads in each team\n",nteams,nthreads);
+            printf("OpenMP: Running on device with %d teams in total and %d threads in each team\n",nteams,nthreads);
         }
+    }
+
+    int acc_devices = acc_get_num_devices(acc_device_nvidia);
+    printf("Number of available OpenACC devices %d\n", acc_devices);
+    if (acc_devices > 0)
+    {
+        printf("OpenACC: Running on NVIDIA device\n");
     }
 
     bool render = true;
@@ -123,9 +130,13 @@ int main(int argc, char** argv)
     time_and_test(howMany, mandelbrot_omp<float>,                   "Base algo on       " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
     if (num_devices > 0)
     {
-        time_and_test(howMany, mandelbrot_omp_gpu<float>,           "Base algo on GPU   ", buffer, window_w, window_h);
+        time_and_test(howMany, mandelbrot_omp_gpu<float>,           "Base algo OMP/GPU  ", buffer, window_w, window_h);
     }
 
+    if (acc_devices > 0)
+    {
+        time_and_test(howMany, mandelbrot_acc_gpu<float>,           "Base algo ACC/GPU  ", buffer, window_w, window_h);
+    }
     time_and_test(howMany, mandelbrot_highway::mandelbrot,          "Auto dispatch on   " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
     time_and_test(howMany, mandelbrot_highway::mandelbrot_sse2,     "SSE2 dispatch on   " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
     time_and_test(howMany, mandelbrot_highway::mandelbrot_ssse3,    "SSSE3 dispatch on  " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);

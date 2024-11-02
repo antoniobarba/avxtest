@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED 23)
 
 set(CMAKE_CXX_FLAGS "-ffast-math")
 
+find_package(OpenACC REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(HWY REQUIRED NO_MODULE)
