@@ -5,13 +5,15 @@
 #include <common_math.h>
 #include <thread>
 
-constexpr size_t window_w = 1024;
-constexpr size_t window_h = 1024;
+constexpr size_t window_w = 4096;
+constexpr size_t window_h = 4096;
 
 using namespace mandelbrot_highway;
 
 void time_and_test(size_t iterations, MandelbrotFunc f, const std::string& name, void * buffer, int w, int h)
 {
+    std::cout << "Testing "<< name << " over " << iterations << " iterations: " << std::flush;
+
     using ns = std::chrono::nanoseconds;
     ns bestTime{std::chrono::nanoseconds::max()};
     ns worst{std::chrono::nanoseconds::min()};
@@ -32,7 +34,6 @@ void time_and_test(size_t iterations, MandelbrotFunc f, const std::string& name,
         }
     }
 
-    std::cout << "Testing "<< name << " over " << iterations << " iterations: ";
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(bestTime) << " - " << std::chrono::duration_cast<std::chrono::milliseconds>(worst) << "\n";
 }
 
@@ -117,10 +118,22 @@ int main(int argc, char** argv)
     // }
 
     const int howMany = 5;
-    time_and_test(howMany, mandelbrot_base<float>,          "Base algo single core ", buffer, window_w, window_h);
-    time_and_test(howMany, mandelbrot_omp<float>,           "Base algo on 4 core   ", buffer, window_w, window_h);
-    time_and_test(howMany, mandelbrot_omp_gpu<float>,       "Base algo on GPU      ", buffer, window_w, window_h);
-    time_and_test(howMany, mandelbrot_highway::mandelbrot,  "AVX2 algo on 4 core   ", buffer, window_w, window_h);
+    const int ncpus = omp_get_num_procs();
+    //time_and_test(howMany, mandelbrot_base<float>,                 "Base algo single core ", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_omp<float>,                   "Base algo on       " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
+    if (num_devices > 0)
+    {
+        time_and_test(howMany, mandelbrot_omp_gpu<float>,           "Base algo on GPU   ", buffer, window_w, window_h);
+    }
+
+    time_and_test(howMany, mandelbrot_highway::mandelbrot,          "Auto dispatch on   " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_highway::mandelbrot_sse2,     "SSE2 dispatch on   " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_highway::mandelbrot_ssse3,    "SSSE3 dispatch on  " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_highway::mandelbrot_sse4,     "SSE4 dispatch on   " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_highway::mandelbrot_avx2,     "AVX2 dispatch on   " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_highway::mandelbrot_avx512,   "AVX512 dispatch on " + std::to_string(ncpus) +" threads", buffer, window_w, window_h);
+    
+    
     //t.join();
 
     if (render)

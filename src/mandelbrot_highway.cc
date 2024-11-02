@@ -117,5 +117,31 @@ namespace mandelbrot_highway {
         return HWY_DYNAMIC_DISPATCH(mandelbrot_vec_omp)(points,w,h);
     }
 
+    void mandelbrot_sse2(void* HWY_RESTRICT points, int w, int h) 
+    {
+        return N_SSE2::mandelbrot_vec_omp(points,w,h);
+    }
+
+    void mandelbrot_ssse3(void* HWY_RESTRICT points, int w, int h) 
+    {
+        return N_SSSE3::mandelbrot_vec_omp(points,w,h);
+    }
+
+    void mandelbrot_sse4(void* HWY_RESTRICT points, int w, int h) 
+    {
+        return N_SSE4::mandelbrot_vec_omp(points,w,h);
+    }
+
+    void mandelbrot_avx2(void* HWY_RESTRICT points, int w, int h) 
+    {
+        return N_AVX2::mandelbrot_vec_omp(points,w,h);
+    }
+
+    void mandelbrot_avx512(void* HWY_RESTRICT points, int w, int h) 
+    {
+        return N_AVX3::mandelbrot_vec_omp(points,w,h);
+    }
+
+
 }
 #endif
