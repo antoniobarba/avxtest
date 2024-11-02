@@ -38,6 +38,22 @@ void time_and_test(size_t iterations, MandelbrotFunc f, const std::string& name,
 
 int main(int argc, char** argv)
 {
+    int num_devices = omp_get_num_devices();
+    printf("Number of available devices %d\n", num_devices);
+    #pragma omp target 
+    {
+        if (omp_is_initial_device()) 
+        {
+            printf("Running on host\n");    
+        } 
+        else 
+        {
+            int nteams= omp_get_num_teams(); 
+            int nthreads= omp_get_num_threads();
+            printf("Running on device with %d teams in total and %d threads in each team\n",nteams,nthreads);
+        }
+    }
+
     bool render = true;
     if (argc == 2 && strcmp(argv[1], "-norender") == 0) render = false;
     void * buffer;
@@ -103,6 +119,7 @@ int main(int argc, char** argv)
     const int howMany = 5;
     time_and_test(howMany, mandelbrot_base<float>,          "Base algo single core ", buffer, window_w, window_h);
     time_and_test(howMany, mandelbrot_omp<float>,           "Base algo on 4 core   ", buffer, window_w, window_h);
+    time_and_test(howMany, mandelbrot_omp_gpu<float>,       "Base algo on GPU      ", buffer, window_w, window_h);
     time_and_test(howMany, mandelbrot_highway::mandelbrot,  "AVX2 algo on 4 core   ", buffer, window_w, window_h);
     //t.join();
 

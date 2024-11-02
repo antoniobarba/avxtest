@@ -77,3 +77,32 @@ void mandelbrot_omp(void* points, int w, int h)
         }
     }
 }
+
+
+template <class T>
+void mandelbrot_omp_gpu(void* points, int w, int h)
+{
+    uint32_t * p = (uint32_t *)points;      
+    #pragma omp target teams distribute parallel for default(private) shared(w, h, p)
+    for (int j=0; j<h; ++j)
+    {
+        for (int i=0; i<w; ++i)
+        {
+            T x0 = map_to<T>(i, 0, w, -2.0, 0.47);
+            T y0 = map_to<T>(j, 0, h, -1.12, 1.12);
+            T x = 0;
+            T y = 0;
+            int iteration = 0;
+            const int max_iteration = 1000;
+            while (x*x + y*y <= 4 && iteration < max_iteration)
+            {
+                T xtemp = x*x - y*y + x0;
+                y = 2*x*y + y0;
+                x = xtemp;
+                ++iteration;
+            }
+            T color = map_to(iteration, 0, 15, 0, 255);
+            p[j * w + i] = map_rgba((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
+        }
+    }
+}
