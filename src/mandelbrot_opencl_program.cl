@@ -31,6 +31,6 @@ __kernel void calc_pixel(__global void *buffer, int w, int h)
         ++iteration;
     }
     float color = map_to(iteration, 0, 15, 0, 255);
-    uint * p = (uint *)buffer; 
+    __global uint * p = (__global uint *)buffer; 
     p[j * w + i] = map_rgba((uchar)color, (uchar)color, (uchar)color, 255);
 }
