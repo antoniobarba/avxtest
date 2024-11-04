@@ -134,9 +134,9 @@ int main(int argc, char **argv)
 
     for (auto d : clDevices)
     {
-        d.loadProgram("../src/mandelbrot_opencl_program.cl", "calc_pixel");
+        easycl::Kernel k = d.loadProgram("../src/mandelbrot_opencl_program.cl").createKernel("calc_pixel");
         auto mandelbrotToCall = [&](void *points, int w, int h){
-            mandelbrot_opencl(d, points, w, h);
+            mandelbrot_opencl(k, d, points, w, h);
         };
         time_and_test(howMany, mandelbrotToCall, d.getName(), buffer, window_w, window_h);
     }

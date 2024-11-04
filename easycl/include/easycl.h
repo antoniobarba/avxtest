@@ -1,6 +1,8 @@
 #pragma once
 
 #include <device.h>
+#include <program.h>
+#include <kernel.h>
 #include <vector>
 
 namespace easycl

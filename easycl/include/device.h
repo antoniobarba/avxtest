@@ -5,16 +5,14 @@
 #include <CL/cl.h>
 
 namespace easycl {
+    class Program;
+    
     enum class DeviceStatus
     {
         UNINITIALIZED,
         READY,
         ERROR_CREATING_CONTEXT,
-        ERROR_CREATING_COMMAND_QUEUE,
-        ERROR_CREATING_PROGRAM,
-        ERROR_BUILDING_PROGRAM,
-        ERROR_CREATING_KERNEL,
-        PROGRAM_LOADED
+        ERROR_CREATING_COMMAND_QUEUE
     };
 
     class Device
@@ -23,35 +21,16 @@ namespace easycl {
         Device(cl_platform_id platformId, cl_device_id deviceId);
         ~Device();
 
-        bool loadProgram(const std::filesystem::path &program, const std::string &kernel);
-
-        void runKernel(const std::vector<size_t> &dimensions);
-
-        template <typename... Args>
-        void runKernel(const std::vector<size_t> &dimensions, Args &&...args)
-        {
-            setKernelArgs(0, std::forward<Args>(args)...);
-            runKernel(dimensions);
-        }
-
-        std::string getName() const;
+        Program loadProgram(const std::filesystem::path &program);
+        std::string getName() const { return _name; }
 
         cl_command_queue getQueue() const { return _queue; }
         cl_context getContext() const { return _context; }
+        cl_device_id getDevice() const { return _device; }
+        DeviceStatus getStatus() const { return _status; }
 
     private:
-        template <typename T>
-        void setKernelArgs(size_t numOfArgs, T&& value)
-        {
-            clSetKernelArg(_kernel, numOfArgs, sizeof(T), &value);
-        }
-
-        template <typename T, typename... Args>
-        void setKernelArgs(size_t numOfArgs, T&& value, Args&& ... args)
-        {
-            clSetKernelArg(_kernel, numOfArgs, sizeof(T), &value);
-            setKernelArgs(numOfArgs+1, std::forward<Args>(args)...);
-        }
+        
 
         cl_platform_id _platform;
         cl_device_id _device;
