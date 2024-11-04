@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED 23)
 
 find_package(OpenCL REQUIRED)
 
-add_library(EasyCL src/easycl.cc)
+add_library(EasyCL src/easycl.cc src/device.cc)
 
 target_include_directories(EasyCL PUBLIC include PRIVATE ${OpenCL_INCLUDE_DIR})
 target_compile_definitions(EasyCL PRIVATE CL_TARGET_OPENCL_VERSION=300)

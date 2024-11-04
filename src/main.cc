@@ -5,6 +5,7 @@
 #include <mandelbrot_opencl.h>
 #include <CL/cl.h>
 #include <common_math.h>
+#include <easycl.h>
 #include <thread>
 
 constexpr size_t window_w = 4096;
@@ -66,27 +67,15 @@ int main(int argc, char **argv)
         printf("No GPU detected by OpenACC\n");
     }
 
-    cl_int CL_err = CL_SUCCESS;
-    cl_uint cl_platforms = 0;
-
-    CL_err = clGetPlatformIDs(0, NULL, &cl_platforms);
-
-    if (CL_err == CL_SUCCESS)
+    auto clDevices = easycl::getDevices(CL_DEVICE_TYPE_GPU);
+    if (clDevices.size()>0)
     {
-        printf("OpenCL: %u device(s) found\n", cl_platforms);
-        cl_platform_id platform;
-        cl_device_id device;
-        clGetPlatformIDs(1, &platform, NULL);
-        clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
+        printf("OpenCL - %d GPUs detected:\n", clDevices.size());
 
-        // print device name
-        size_t valueSize;
-        clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &valueSize);
-        char *value = (char*) malloc(valueSize+1);
-        value[valueSize] = 0;
-        clGetDeviceInfo(device, CL_DEVICE_NAME, valueSize, value, NULL);
-        printf("First OpenCL Device Name: %s\n", value);
-        free(value);
+        for (const auto& d : clDevices)
+        {
+            std::cout << d.getName() << "\n";
+        }
     }
 
     bool render = true;
@@ -143,9 +132,13 @@ int main(int argc, char **argv)
         time_and_test(howMany, mandelbrot_acc_gpu<float>, "Base algo ACC/GPU  ", buffer, window_w, window_h);
     }
 
-    if (cl_platforms > 0)
+    for (auto d : clDevices)
     {
-        time_and_test(howMany, mandelbrot_opencl,         "OpenCL algo        ", buffer, window_w, window_h);
+        d.loadProgram("../src/mandelbrot_opencl_program.cl", "calc_pixel");
+        auto mandelbrotToCall = [&](void *points, int w, int h){
+            mandelbrot_opencl(d, points, w, h);
+        };
+        time_and_test(howMany, mandelbrotToCall, d.getName(), buffer, window_w, window_h);
     }
 
     time_and_test(howMany, mandelbrot_highway::mandelbrot, "Auto dispatch on   " + std::to_string(ncpus) + " threads", buffer, window_w, window_h);

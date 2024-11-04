@@ -10,7 +10,6 @@ find_package(OpenACC REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(HWY REQUIRED NO_MODULE)
-find_package(OpenCL REQUIRED)
 
 add_subdirectory(easycl)
 
