@@ -9,4 +9,4 @@ find_package(OpenCL REQUIRED)
 add_library(EasyCL src/easycl.cc src/device.cc src/program.cc src/kernel.cc)
 
 target_include_directories(EasyCL PUBLIC include PRIVATE ${OpenCL_INCLUDE_DIR})
-target_compile_definitions(EasyCL PRIVATE CL_TARGET_OPENCL_VERSION=300)
+target_compile_definitions(EasyCL PRIVATE CL_TARGET_OPENCL_VERSION=100)

@@ -121,7 +121,7 @@ int main(int argc, char **argv)
     const int howMany = 5;
     const int ncpus = omp_get_num_procs();
     //time_and_test(howMany, mandelbrot_base<float>,                 "Base algo single core ", buffer, window_w, window_h);
-    time_and_test(howMany, mandelbrot_omp<float>, "Base algo on       " + std::to_string(ncpus) + " threads", buffer, window_w, window_h);
+    //time_and_test(howMany, mandelbrot_omp<float>, "Base algo on       " + std::to_string(ncpus) + " threads", buffer, window_w, window_h);
     if (num_devices > 0)
     {
         time_and_test(howMany, mandelbrot_omp_gpu<float>, "Base algo OMP/GPU  ", buffer, window_w, window_h);

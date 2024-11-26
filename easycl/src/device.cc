@@ -25,7 +25,8 @@ Device::Device(cl_platform_id platformId, cl_device_id deviceId)
         return;
     }
 
-    _queue = clCreateCommandQueueWithProperties(_context, _device, nullptr, &err);
+    // _queue = clCreateCommandQueueWithProperties(_context, _device, nullptr, &err);
+    _queue = clCreateCommandQueue(_context, _device, 0, &err);
 
     if (err != 0)
     {
