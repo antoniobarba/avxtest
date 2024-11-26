@@ -13,9 +13,6 @@ check_source_compiles(CXX
 "#if defined(__powerpc64__) || defined(_M_PPC) || defined(__powerpc__)
 #define MY_ARCH_PPC 1
 #else
-#define MY_ARCH_PPC 0
-#endif
-#if !MY_ARCH_PPC
 #error \"No PPC arch\"
 #endif
 int main() { return 0; }
