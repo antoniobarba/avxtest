@@ -16,6 +16,13 @@ Device::Device(cl_platform_id platformId, cl_device_id deviceId)
     _name.assign(value);
     free(value);
 
+    clGetDeviceInfo(_device, CL_DEVICE_VENDOR, 0, NULL, &valueSize);
+    value = (char *)malloc(valueSize + 1);
+    value[valueSize] = 0;
+    clGetDeviceInfo(_device, CL_DEVICE_VENDOR, valueSize, value, NULL);
+    _vendor.assign(value);
+    free(value);
+
     cl_int err;
     _context = clCreateContext(NULL, 1, &_device, NULL, NULL, &err);
 

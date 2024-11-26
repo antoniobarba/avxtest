@@ -23,6 +23,7 @@ namespace easycl {
 
         Program loadProgram(const std::filesystem::path &program);
         std::string getName() const { return _name; }
+        std::string getVendor() const { return _vendor; }
 
         cl_command_queue getQueue() const { return _queue; }
         cl_context getContext() const { return _context; }
@@ -40,6 +41,7 @@ namespace easycl {
         cl_kernel _kernel=nullptr;
 
         std::string _name;
+        std::string _vendor;
 
         DeviceStatus _status;
     };
