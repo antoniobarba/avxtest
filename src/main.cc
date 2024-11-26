@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     {
         // Enable one target at a time
         hwy::SetSupportedTargetsForTest(target);
-        time_and_test(howMany, mandelbrot_highway::mandelbrot, "Testing " + std::string(hwy::TargetName(target)) + " on " + std::to_string(ncpus) + " threads", buffer, window_w, window_h);
+        time_and_test(howMany, mandelbrot_highway::mandelbrot, std::string(hwy::TargetName(target)) + " on " + std::to_string(ncpus) + " threads", buffer, window_w, window_h);
     }
 
     // Reset to normal
