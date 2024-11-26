@@ -1,6 +1,0 @@
-/home/thekaneb/code/avxtest/build-nocl/CMakeFiles/test.dir
-/home/thekaneb/code/avxtest/build-nocl/CMakeFiles/edit_cache.dir
-/home/thekaneb/code/avxtest/build-nocl/CMakeFiles/rebuild_cache.dir
-/home/thekaneb/code/avxtest/build-nocl/easycl/CMakeFiles/EasyCL.dir
-/home/thekaneb/code/avxtest/build-nocl/easycl/CMakeFiles/edit_cache.dir
-/home/thekaneb/code/avxtest/build-nocl/easycl/CMakeFiles/rebuild_cache.dir

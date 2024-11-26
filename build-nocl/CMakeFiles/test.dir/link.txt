@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file,CMakeFiles/test.dir/link.d CMakeFiles/test.dir/src/mandelbrot_highway.cc.o CMakeFiles/test.dir/src/mandelbrot_opencl.cc.o CMakeFiles/test.dir/src/main.cc.o -o test  /usr/lib/libOpenCL.so /usr/lib/libSDL2-2.0.so.0.3000.9 /usr/lib/libhwy.so.1.2.0 easycl/libEasyCL.a /usr/lib/libgomp.so /usr/lib/libpthread.a

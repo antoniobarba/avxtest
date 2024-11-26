@@ -1,2 +1,0 @@
-/usr/bin/ar qc libEasyCL.a CMakeFiles/EasyCL.dir/src/easycl.cc.o CMakeFiles/EasyCL.dir/src/device.cc.o CMakeFiles/EasyCL.dir/src/program.cc.o CMakeFiles/EasyCL.dir/src/kernel.cc.o
-/usr/bin/ranlib libEasyCL.a
