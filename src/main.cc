@@ -2,10 +2,14 @@
 #include <cstring>
 #include <SDL2/SDL.h>
 #include <mandelbrot_highway.h>
+
+#if USE_GPU
 #include <mandelbrot_opencl.h>
 #include <CL/cl.h>
-#include <common_math.h>
 #include <easycl.h>
+#endif
+
+#include <common_math.h>
 #include <thread>
 #include <hwy/targets.h>
 
@@ -88,6 +92,7 @@ int main(int argc, char **argv)
     time_and_test(howMany, mandelbrot_base<float>,"Base algo single thread", buffer, window_w, window_h);
     time_and_test(howMany, mandelbrot_omp<float>, "Base algo on " + std::to_string(ncpus) + " threads", buffer, window_w, window_h);
 
+    #if USE_GPU
     auto clDevices = easycl::getDevices(CL_DEVICE_TYPE_GPU);
     for (auto d : clDevices)
     {
@@ -100,6 +105,7 @@ int main(int argc, char **argv)
             time_and_test(howMany, mandelbrotToCall, d.getName(), buffer, window_w, window_h);
         }
     }
+    #endif
 
     auto allTargets = hwy::SupportedAndGeneratedTargets();
     for (int64_t target : allTargets)

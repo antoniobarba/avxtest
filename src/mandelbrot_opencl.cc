@@ -1,3 +1,4 @@
+#if USE_GPU
 #include <common_math.h>
 #include <mandelbrot_opencl.h>
 #include <easycl.h>
@@ -14,3 +15,4 @@ void mandelbrot_opencl(easycl::Kernel& kernel, easycl::Device& device, void *poi
 
     clReleaseMemObject(clBuffer);
 }
+#endif
