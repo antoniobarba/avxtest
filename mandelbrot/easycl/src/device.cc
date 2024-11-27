@@ -59,9 +59,14 @@ Device::~Device()
         clReleaseContext(_context);
 }
 
-Program Device::loadProgram(const std::filesystem::path &program)
+Program Device::loadProgramFromFile(const std::filesystem::path &program)
 {
     auto p = Program(*this, program);
     return p;
 }
 
+Program Device::loadProgram(const std::string &program)
+{
+    auto p = Program(*this, program);
+    return p;
+}

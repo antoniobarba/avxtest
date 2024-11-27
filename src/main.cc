@@ -2,7 +2,7 @@
 #include <cstring>
 #include <SDL2/SDL.h>
 #include <mandelbrot_highway.h>
-
+#define USE_GPU 1
 #if USE_GPU
 #include <mandelbrot_opencl.h>
 #include <CL/cl.h>
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
         // Calculate shit
         s = SDL_GetWindowSurface(window);
         canvas = SDL_CreateRGBSurfaceWithFormat(
-            0, window_w, window_h, 32, SDL_PIXELFORMAT_RGBA8888);
+            0, window_w, window_h, 32, SDL_PIXELFORMAT_ARGB8888);
 
         if (SDL_MUSTLOCK(canvas))
         {
@@ -98,7 +98,46 @@ int main(int argc, char **argv)
     {
         if (d.getVendor() != "Intel(R) Corporation")
         {
-            easycl::Kernel k = d.loadProgram("../src/mandelbrot_opencl_program.cl").createKernel("calc_pixel");
+            //easycl::Kernel k = d.loadProgramFromFile("../src/mandelbrot_opencl_program.cl").createKernel("calc_pixel");
+            
+            std::string programSource = 
+            "float map_to(float value, float sourceMin, float sourceMax, float destMin, float destMax)\n\
+            {\n\
+                float s = sourceMax - sourceMin;\n\
+                float d = destMax - destMin;\n\
+                float sourceRatio = (value - sourceMin) / s;\n\
+                return destMin + sourceRatio * d;\n\
+            }\n\
+            \n\
+            uint map_rgba(uchar r, uchar g, uchar b, uchar a)\n\
+            {\n\
+                // return 0xffffffff;\n\
+                return r << 24 | g << 16 | b << 8 | a;\n\
+            }\n\
+            \n\
+            __kernel void calc_pixel(__global void *buffer, int w, int h)\n\
+            {\n\
+                int i = get_global_id(0);\n\
+                int j = get_global_id(1);\n\
+                float x0 = map_to(i, 0, w, -2.0, 0.47);\n\
+                float y0 = map_to(j, 0, h, -1.12, 1.12);\n\
+                float x = 0;\n\
+                float y = 0;\n\
+                int iteration = 0;\n\
+                const int max_iteration = 1000;\n\
+                while (x * x + y * y <= 4 && iteration < max_iteration)\n\
+                {\n\
+                    float xtemp = x * x - y * y + x0;\n\
+                    y = 2 * x * y + y0;\n\
+                    x = xtemp;\n\
+                    ++iteration;\n\
+                }\n\
+                float color = map_to(iteration, 0, 15, 0, 255);\n\
+                __global uint * p = (__global uint *)buffer; \n\
+                p[j * w + i] = map_rgba((uchar)color, (uchar)color, (uchar)color, 255);\n\
+            }\n";
+            
+            easycl::Kernel k = d.loadProgram(programSource).createKernel("calc_pixel");
             auto mandelbrotToCall = [&](void *points, int w, int h){
                 mandelbrot_opencl(k, d, points, w, h);
             };

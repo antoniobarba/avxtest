@@ -84,7 +84,7 @@ namespace HWY_NAMESPACE {  // required: unique per target
                     for (size_t lane=0; lane<Lanes(d); ++lane)
                     {
                         uint8_t value = (uint8_t)color.raw[lane];
-                        p[j*w + i + lane] = map_rgba(value, value, value, 255);
+                        p[j*w + i + lane] = map_argb(value, value, value, 255);
                     }
                 }
             }

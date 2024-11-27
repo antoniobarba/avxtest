@@ -13,6 +13,12 @@ uint map_rgba(uchar r, uchar g, uchar b, uchar a)
     return r << 24 | g << 16 | b << 8 | a;
 }
 
+uint map_argb(uchar r, uchar g, uchar b, uchar a)
+{
+    // return 0xffffffff;
+    return a << 24 | r << 16 | g << 8 | b;
+}
+
 __kernel void calc_pixel(__global void *buffer, int w, int h)
 {
     int i = get_global_id(0);

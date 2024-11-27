@@ -21,7 +21,9 @@ namespace easycl {
         Device(cl_platform_id platformId, cl_device_id deviceId);
         ~Device();
 
-        Program loadProgram(const std::filesystem::path &program);
+        Program loadProgramFromFile(const std::filesystem::path &program);
+        Program loadProgram(const std::string &program);
+
         std::string getName() const { return _name; }
         std::string getVendor() const { return _vendor; }
 

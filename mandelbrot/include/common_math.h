@@ -21,6 +21,11 @@ inline uint32_t map_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
     return r << 24 | g << 16 | b << 8 | a;
 }
 
+inline uint32_t map_argb(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+    return a << 24 | r << 16 | g << 8 | b;
+}
+
 using MandelbrotFunc = std::function<void(void*, int, int)>;
 
 template <class T>
@@ -46,7 +51,7 @@ void mandelbrot_base(void* points, int w, int h)
                 ++iteration;
             }
             T color = map_to(iteration, 0, 15, 0, 255);
-            p[j * w + i] = map_rgba((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
+            p[j * w + i] = map_argb((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
         }
     }
 }
@@ -74,7 +79,7 @@ void mandelbrot_omp(void* points, int w, int h)
                 ++iteration;
             }
             T color = map_to(iteration, 0, 15, 0, 255);
-            p[j * w + i] = map_rgba((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
+            p[j * w + i] = map_argb((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
         }
     }
 }
@@ -103,7 +108,7 @@ void mandelbrot_omp_gpu(void* points, int w, int h)
                 ++iteration;
             }
             T color = map_to(iteration, 0, 15, 0, 255);
-            p[j * w + i] = map_rgba((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
+            p[j * w + i] = map_argb((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
         }
     }
 }
@@ -132,7 +137,7 @@ void mandelbrot_acc_gpu(void* points, int w, int h)
                 ++iteration;
             }
             T color = map_to(iteration, 0, 15, 0, 255);
-            p[j * w + i] = map_rgba((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
+            p[j * w + i] = map_argb((uint8_t)color, (uint8_t)color, (uint8_t)color, 255);
         }
     }
 }

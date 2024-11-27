@@ -26,7 +26,27 @@ Program::Program(Device &device, const std::filesystem::path &program)
         return;
     }
 
-    err = clBuildProgram(_program, 0, NULL, NULL, NULL, NULL);
+    build(device);
+}
+
+Program::Program(Device &device, const std::string &programSource)
+{
+    size_t programSize = programSource.size();
+    error_t err;
+    const char *programText = programSource.c_str();
+    _program = clCreateProgramWithSource(device.getContext(), 1, &programText, &programSize, &err);
+    if (err != 0)
+    {
+        _status = ProgramStatus::FILE_ERROR;
+        return;
+    }
+
+    build(device);
+}
+
+void Program::build(Device& device)
+{
+    error_t err = clBuildProgram(_program, 0, NULL, NULL, NULL, NULL);
     if (err != 0)
     {
         std::cerr << "OpenCL Build failed\n";
