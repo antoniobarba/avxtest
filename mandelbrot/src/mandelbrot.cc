@@ -15,11 +15,13 @@ void mandelbrot_cpu(void * points, int w, int h)
     mandelbrot_highway::mandelbrot(points, w, h);
 }
 
+#if USE_GPU
 struct __dev_ker
 {
     easycl::Device* dev;
     easycl::Kernel* ker;
 };
+#endif
 
 void* mandelbrot_create_gpu_kernel()
 {
@@ -78,10 +80,12 @@ void* mandelbrot_create_gpu_kernel()
 
 void mandelbrot_free_gpu_kernel(void *kernel)
 {
+    #if USE_GPU
     __dev_ker * p = (__dev_ker*)kernel;
     delete (p->ker);
     delete (p->dev);
     delete p;
+    #endif
 }
 
 // points must be allocated with at least 4 x w x h bytes

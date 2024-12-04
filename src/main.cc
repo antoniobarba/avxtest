@@ -2,7 +2,6 @@
 #include <cstring>
 #include <SDL2/SDL.h>
 #include <mandelbrot_highway.h>
-#define USE_GPU 1
 #if USE_GPU
 #include <mandelbrot_opencl.h>
 #include <CL/cl.h>
