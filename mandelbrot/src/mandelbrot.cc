@@ -83,8 +83,8 @@ void mandelbrot_free_gpu_kernel(void *kernel)
     __dev_ker * p = (__dev_ker*)kernel;
     delete (p->ker);
     delete (p->dev);
+    delete p;
     #endif
-    delete kernel;
 }
 
 // points must be allocated with at least 4 x w x h bytes
