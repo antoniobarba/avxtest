@@ -11,6 +11,23 @@ except:
 def makebuffer(w, h):
     return (c_int32 * w * h)()
 
+class mandel:
+    def __init__(self, use_gpu: bool):
+        if use_gpu:
+            self.kernel = mandelbrot_create_gpu_kernel()
+        else:
+            self.kernel = None
+
+    def __del__(self):
+        if self.kernel is not None:
+            mandelbrot_free_gpu_kernel(self.kernel)
+
+    def run(self, buffer, width: int, height: int):
+        if self.kernel is not None:
+            mandelbrot_gpu(self.kernel, buffer, width, height)
+        else:
+            mandelbrot_cpu(buffer, width, height)
+
 # points must be allocated with at least 4 x w x h bytes 
 # extern void mandelbrot_cpu(void * points, int w, int h);
 __mandelbrot_cpu_proto = CFUNCTYPE(None, c_void_p, c_int, c_int)
