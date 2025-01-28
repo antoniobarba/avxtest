@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
-project(Mandelbrot VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED 23)
-option(USE_GPU "Enable GPU computing using OpenCL" Off)
 
 add_compile_options(-ffast-math)
 include(CheckSourceCompiles)
